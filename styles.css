@@ -142,6 +142,25 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 .empty b { color: var(--ink-2); font-weight: 600; }
 
+.steps {
+  margin: 0; padding: 16px 18px 16px 36px;
+  font-size: 14px; line-height: 1.65; color: var(--ink-2);
+}
+.steps li { margin: 0 0 10px; }
+.steps li:last-child { margin-bottom: 0; }
+.steps li::marker { color: var(--accent); font-weight: 600; }
+.steps b { color: var(--ink); font-weight: 600; }
+
+.install-hint {
+  display: block; width: 100%; text-align: left;
+  background: var(--accent-bg); border: 0; border-radius: var(--r);
+  padding: 13px 16px; font-size: 14px; line-height: 1.55;
+  color: var(--ink-2); cursor: pointer;
+}
+.install-hint b { color: var(--accent); font-weight: 600; }
+.install-hint:active { opacity: .85; }
+.install-hint:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 /* ---------- 任务行 ---------- */
 .row {
   display: flex; align-items: flex-start; gap: 12px;

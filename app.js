@@ -209,8 +209,17 @@
       '</button></div>';
   }
 
+  function installHintHtml() {
+    // 只有从主屏幕图标进来时 standalone 才为 true；在浏览器里开着就提示去装
+    if (window.navigator.standalone === true) return '';
+    return '<section class="sec">' +
+      '<button type="button" class="install-hint" data-act="go-settings">' +
+        '还没装到主屏幕？<b>去设置看 3 步装法，装好后才像 App。</b>' +
+      '</button></section>';
+  }
+
   function viewToday() {
-    return bannerHtml() + tasksTodayHtml() + coursesTodayHtml();
+    return installHintHtml() + bannerHtml() + tasksTodayHtml() + coursesTodayHtml();
   }
 
   /* ============ 渲染：全部 ============ */
@@ -303,6 +312,18 @@
         '<div class="stat"><b>' + db.deadlines.length + '</b><span>期限</span></div>' +
         '<div class="stat"><b>' + (total - done) + '</b><span>未完成</span></div>' +
         '<div class="stat"><b>' + done + '</b><span>已完成</span></div>' +
+      '</div>' +
+    '</section>' +
+
+    '<section class="sec">' +
+      '<div class="sec-head"><h2 class="sec-title">让手机主动提醒你</h2></div>' +
+      '<div class="card"><ol class="steps">' +
+        '<li><b>装到主屏幕。</b>用 Safari 打开本页面，点底部「分享」→「添加到主屏幕」。以后从桌面图标进，全屏、断网也能开。</li>' +
+        '<li><b>期限进日历，到点真的会响。</b>下面「数据」→「导出到苹果日历」，在「文件」里点开生成的 .ics →「添加全部事件」。日历会在截止前 3 天、前 1 天和当天早上 9 点各提醒一次。改过期限后重新导出导入一次，旧的那条在日历里删掉即可。</li>' +
+        '<li><b>每天早上推你一下。</b>打开系统「提醒事项」，新建一条「打开今日，看今天要做的事」，设为每天重复、定个时间（比如起床后 5 分钟）。到点它会弹通知，点一下再进本 App 看清单。</li>' +
+      '</ol></div>' +
+      '<div class="field-hint" style="padding:10px 2px 0">' +
+        '这三步都用手机自带功能，不需要服务器和账号。本 App 自己不会弹通知——网页做不到，所以把「响」这件事交给日历和提醒事项。' +
       '</div>' +
     '</section>' +
 
@@ -510,6 +531,7 @@
     if (actEl) {
       const act = actEl.dataset.act;
       if (act === 'quick-add') { quickAdd(); return; }
+      if (act === 'go-settings') { tab = 'settings'; window.scrollTo(0, 0); render(); return; }
       if (act === 'add-dl') { sheetAddDeadline(); return; }
       if (act === 'add-course') { sheetAddCourse(); return; }
       if (act === 'del-task') { delTask(actEl.dataset.id); return; }
@@ -641,17 +663,21 @@
       L.push('DTEND;VALUE=DATE:' + icsDate(nextDay(d.date)));
       L.push('SUMMARY:' + icsEsc(d.title));
       L.push('DESCRIPTION:' + icsEsc('来自「今日」的期限提醒'));
-      // 提前 3 天上午 9 点提醒
+      // 全天事件从截止日 00:00 起算，要落在早上 9 点就得从起点往回补 15 小时
       L.push('BEGIN:VALARM');
-      L.push('TRIGGER:-P3DT9H');
+      L.push('TRIGGER:-P2DT15H');
       L.push('ACTION:DISPLAY');
       L.push('DESCRIPTION:' + icsEsc('还有 3 天：' + d.title));
       L.push('END:VALARM');
-      // 前一天上午 9 点
       L.push('BEGIN:VALARM');
-      L.push('TRIGGER:-P1DT9H');
+      L.push('TRIGGER:-PT15H');
       L.push('ACTION:DISPLAY');
       L.push('DESCRIPTION:' + icsEsc('明天截止：' + d.title));
+      L.push('END:VALARM');
+      L.push('BEGIN:VALARM');
+      L.push('TRIGGER:PT9H');
+      L.push('ACTION:DISPLAY');
+      L.push('DESCRIPTION:' + icsEsc('今天截止：' + d.title));
       L.push('END:VALARM');
       L.push('END:VEVENT');
     });

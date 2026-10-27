@@ -1,4 +1,4 @@
-const CACHE = 'today-v3';
+const CACHE = 'today-v4';
 const ASSETS = [
   './',
   './index.html',
